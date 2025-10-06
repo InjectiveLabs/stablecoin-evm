@@ -56,6 +56,18 @@ yes 12345678 | injectived --home $INJHOME keys list
 (passphrase for keyring is `12345678` and `$INJHOME` has to be pointing to valid
 `.injectived` from which the node runs).
 
+## Setup node and yarn
+
+To ensure using the correct versions of node and yarn, please run the following
+commands.
+
+```bash
+nvm install 20.18.3
+nvm use 20.18.3
+npm i -g yarn@1.22.19
+yarn install
+```
+
 ## Deploying full suite of FiatToken (USDC) contracts
 
 The flow is same as in [README.md](/README.md), there is a pre-filled
