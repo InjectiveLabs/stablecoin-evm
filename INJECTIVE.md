@@ -44,9 +44,7 @@ user3 - 0x6880D7bfE96D49501141375ED835C24cf70E2bD7
 
 We deploy FiatToken using `user1` as deployer and owner (also masterMinter),
 will send tokens to `user2` and try to send to blacklisted `user3`. User3 is
-blacklisted in
-[injective-test.blacklist.remote.json](/injective-test.blacklist.remote.json)
-and this is applied during FiatToken deployment.
+blacklisted manually.
 
 To use `injectived` client in separate terminal, e.g. list all accounts
 available:
