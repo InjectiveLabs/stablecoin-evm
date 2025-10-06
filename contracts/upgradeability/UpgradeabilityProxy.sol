@@ -16,10 +16,9 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.20;
 
 import { Proxy } from "./Proxy.sol";
-import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 
 /**
  * @notice This contract implements a proxy that allows to change the
@@ -84,7 +83,7 @@ contract UpgradeabilityProxy is Proxy {
      */
     function _setImplementation(address newImplementation) private {
         require(
-            Address.isContract(newImplementation),
+            newImplementation.code.length > 0,
             "Cannot set a proxy implementation to a non-contract address"
         );
 

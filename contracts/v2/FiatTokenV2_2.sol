@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.20;
 
 import { EIP712Domain } from "./EIP712Domain.sol"; // solhint-disable-line no-unused-import
 import { Blacklistable } from "../v1/Blacklistable.sol"; // solhint-disable-line no-unused-import
@@ -24,6 +24,7 @@ import { FiatTokenV1 } from "../v1/FiatTokenV1.sol"; // solhint-disable-line no-
 import { FiatTokenV2 } from "./FiatTokenV2.sol"; // solhint-disable-line no-unused-import
 import { FiatTokenV2_1 } from "./FiatTokenV2_1.sol";
 import { EIP712 } from "../util/EIP712.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // solhint-disable func-name-mixedcase
 
@@ -246,6 +247,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
      */
     function _balanceOf(address _account)
         internal
+        virtual
         override
         view
         returns (uint256)
@@ -258,7 +260,7 @@ contract FiatTokenV2_2 is FiatTokenV2_1 {
      */
     function approve(address spender, uint256 value)
         external
-        override
+        override(FiatTokenV1, IERC20)
         whenNotPaused
         returns (bool)
     {

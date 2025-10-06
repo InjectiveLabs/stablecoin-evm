@@ -16,9 +16,8 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.20;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { AbstractFiatTokenV1 } from "./AbstractFiatTokenV1.sol";
 import { Ownable } from "./Ownable.sol";
 import { Pausable } from "./Pausable.sol";
@@ -29,8 +28,6 @@ import { Blacklistable } from "./Blacklistable.sol";
  * @dev ERC20 Token backed by fiat reserves
  */
 contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
-    using SafeMath for uint256;
-
     string public name;
     string public symbol;
     uint8 public decimals;
@@ -116,10 +113,11 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * @param _to The address that will receive the minted tokens.
      * @param _amount The amount of tokens to mint. Must be less than or equal
      * to the minterAllowance of the caller.
+     * @dev Marked as internal, so can be called via FiatTokenV2_Inj only.
      * @return True if the operation was successful.
      */
-    function mint(address _to, uint256 _amount)
-        external
+    function _mint(address _to, uint256 _amount)
+        internal
         whenNotPaused
         onlyMinters
         notBlacklisted(msg.sender)
@@ -135,9 +133,9 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
             "FiatToken: mint amount exceeds minterAllowance"
         );
 
-        totalSupply_ = totalSupply_.add(_amount);
-        _setBalance(_to, _balanceOf(_to).add(_amount));
-        minterAllowed[msg.sender] = mintingAllowedAmount.sub(_amount);
+        totalSupply_ = totalSupply_ + _amount;
+        _setBalance(_to, _balanceOf(_to) + _amount);
+        minterAllowed[msg.sender] = mintingAllowedAmount - _amount;
         emit Mint(msg.sender, _to, _amount);
         emit Transfer(address(0), _to, _amount);
         return true;
@@ -192,7 +190,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * @notice Gets the totalSupply of the fiat token.
      * @return The totalSupply of the fiat token.
      */
-    function totalSupply() external override view returns (uint256) {
+    function totalSupply() external virtual override view returns (uint256) {
         return totalSupply_;
     }
 
@@ -203,6 +201,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      */
     function balanceOf(address account)
         external
+        virtual
         override
         view
         returns (uint256)
@@ -272,7 +271,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
             "ERC20: transfer amount exceeds allowance"
         );
         _transfer(from, to, value);
-        allowed[from][msg.sender] = allowed[from][msg.sender].sub(value);
+        allowed[from][msg.sender] = allowed[from][msg.sender] - value;
         return true;
     }
 
@@ -304,7 +303,7 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         address from,
         address to,
         uint256 value
-    ) internal override {
+    ) internal virtual override {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
         require(
@@ -312,8 +311,8 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
             "ERC20: transfer amount exceeds balance"
         );
 
-        _setBalance(from, _balanceOf(from).sub(value));
-        _setBalance(to, _balanceOf(to).add(value));
+        _setBalance(from, _balanceOf(from) - value);
+        _setBalance(to, _balanceOf(to) + value);
         emit Transfer(from, to, value);
     }
 
@@ -355,10 +354,11 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
      * @notice Allows a minter to burn some of its own tokens.
      * @dev The caller must be a minter, must not be blacklisted, and the amount to burn
      * should be less than or equal to the account's balance.
+     * @dev Marked as internal, so can be called via FiatTokenV2_Inj only.
      * @param _amount the amount of tokens to be burned.
      */
-    function burn(uint256 _amount)
-        external
+    function _burn(uint256 _amount)
+        internal
         whenNotPaused
         onlyMinters
         notBlacklisted(msg.sender)
@@ -367,8 +367,8 @@ contract FiatTokenV1 is AbstractFiatTokenV1, Ownable, Pausable, Blacklistable {
         require(_amount > 0, "FiatToken: burn amount not greater than 0");
         require(balance >= _amount, "FiatToken: burn amount exceeds balance");
 
-        totalSupply_ = totalSupply_.sub(_amount);
-        _setBalance(msg.sender, balance.sub(_amount));
+        totalSupply_ = totalSupply_ - _amount;
+        _setBalance(msg.sender, balance - _amount);
         emit Burn(msg.sender, _amount);
         emit Transfer(msg.sender, address(0), _amount);
     }

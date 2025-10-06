@@ -16,14 +16,15 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.20;
 
 import "forge-std/console.sol"; // solhint-disable no-global-import, no-console
 import { Script } from "forge-std/Script.sol";
 import { DeployImpl } from "./DeployImpl.sol";
 import { FiatTokenProxy } from "../../contracts/v1/FiatTokenProxy.sol";
-import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
+import { FiatTokenV2_Inj } from "../../contracts/v2/FiatTokenV2_Inj.sol";
 import { MasterMinter } from "../../contracts/minting/MasterMinter.sol";
+import { MockBankPrecompile } from "./injective/MockBankPrecompile.sol";
 
 /**
  * A utility script to directly deploy Fiat Token contract with the latest implementation
@@ -86,7 +87,7 @@ contract DeployFiatToken is Script, DeployImpl {
     function _deploy(address _impl)
         internal
         returns (
-            FiatTokenV2_2,
+            FiatTokenV2_Inj,
             MasterMinter,
             FiatTokenProxy
         )
@@ -96,9 +97,9 @@ contract DeployFiatToken is Script, DeployImpl {
         // If there is an existing implementation contract,
         // we can simply point the newly deployed proxy contract to it.
         // Otherwise, deploy the latest implementation contract code to the network.
-        FiatTokenV2_2 fiatTokenV2_2 = getOrDeployImpl(_impl);
+        FiatTokenV2_Inj fiatTokenV2_inj = getOrDeployImpl(_impl);
 
-        FiatTokenProxy proxy = new FiatTokenProxy(address(fiatTokenV2_2));
+        FiatTokenProxy proxy = new FiatTokenProxy(address(fiatTokenV2_inj));
 
         // Now that the proxy contract has been deployed, we can deploy the master minter.
         MasterMinter masterMinter = new MasterMinter(address(proxy));
@@ -115,8 +116,8 @@ contract DeployFiatToken is Script, DeployImpl {
         // Do the initial (V1) initialization.
         // Note that this takes in the master minter contract's address as the master minter.
         // The master minter contract's owner is a separate address.
-        FiatTokenV2_2 proxyAsV2_2 = FiatTokenV2_2(address(proxy));
-        proxyAsV2_2.initialize(
+        FiatTokenV2_Inj proxyAsV2_Inj = FiatTokenV2_Inj(address(proxy));
+        proxyAsV2_Inj.initialize(
             tokenName,
             tokenSymbol,
             tokenCurrency,
@@ -128,17 +129,20 @@ contract DeployFiatToken is Script, DeployImpl {
         );
 
         // Do the V2 initialization
-        proxyAsV2_2.initializeV2(tokenName);
+        proxyAsV2_Inj.initializeV2(tokenName);
 
         // Do the V2_1 initialization
-        proxyAsV2_2.initializeV2_1(owner);
+        proxyAsV2_Inj.initializeV2_1(owner);
 
         // Do the V2_2 initialization
-        proxyAsV2_2.initializeV2_2(new address[](0), tokenSymbol);
+        proxyAsV2_Inj.initializeV2_2(new address[](0), tokenSymbol);
+
+        // Do the V2_Inj initialization (registers MTS metadata)
+        proxyAsV2_Inj.initializeV2_Inj();
 
         vm.stopBroadcast();
 
-        return (fiatTokenV2_2, masterMinter, proxy);
+        return (fiatTokenV2_inj, masterMinter, proxy);
     }
 
     /**
@@ -147,7 +151,7 @@ contract DeployFiatToken is Script, DeployImpl {
     function deploy(address _impl)
         external
         returns (
-            FiatTokenV2_2,
+            FiatTokenV2_Inj,
             MasterMinter,
             FiatTokenProxy
         )
@@ -161,7 +165,7 @@ contract DeployFiatToken is Script, DeployImpl {
     function run()
         external
         returns (
-            FiatTokenV2_2,
+            FiatTokenV2_Inj,
             MasterMinter,
             FiatTokenProxy
         )

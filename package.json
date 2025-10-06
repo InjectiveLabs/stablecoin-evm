@@ -44,7 +44,7 @@
     "@nomicfoundation/hardhat-network-helpers": "1.0.8",
     "@nomiclabs/hardhat-truffle5": "2.0.7",
     "@nomiclabs/hardhat-web3": "2.0.0",
-    "@openzeppelin/contracts": "3.4.2",
+    "@openzeppelin/contracts": "5.4.0",
     "@typechain/ethers-v6": "0.4.3",
     "@typechain/hardhat": "9.0.0",
     "@typechain/truffle-v5": "8.0.6",
@@ -85,7 +85,7 @@
     "prettier-plugin-solidity": "1.0.0-alpha.54",
     "q": "1.5.1",
     "sinon": "19.0.2",
-    "solc": "0.6.12",
+    "solc": "0.8.20",
     "solhint": "3.4.1",
     "solidity-coverage": "0.8.9",
     "ts-node": "10.9.1",
@@ -99,7 +99,7 @@
     "sha.js": "2.4.12"
   },
   "engines": {
-    "node": "20.18.0",
+    "node": "20.18.3",
     "yarn": "1.x.x"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"

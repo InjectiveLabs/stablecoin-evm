@@ -333,7 +333,7 @@ function checkSlot(
     let expectedSlotValue: string;
 
     // Logic to validate slots containing a string or a byte.
-    // See: https://docs.soliditylang.org/en/v0.6.12/internals/layout_in_storage.html for
+    // See: https://docs.soliditylang.org/en/v0.8.20/internals/layout_in_storage.html for
     // the encoding logic.
     if (
       mappedExpectations.length === 1 &&

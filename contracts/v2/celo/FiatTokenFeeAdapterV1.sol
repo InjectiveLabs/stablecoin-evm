@@ -16,18 +16,15 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.20;
 
 import {
     IFiatTokenFeeAdapter
 } from "../../interface/celo/IFiatTokenFeeAdapter.sol";
 import { ICeloGasToken } from "../../interface/celo/ICeloGasToken.sol";
 import { IDecimals } from "../../interface/celo/IDecimals.sol";
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 
 contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
-    using SafeMath for uint256;
-
     ICeloGasToken public adaptedToken;
 
     uint8 internal _initializedVersion;
@@ -119,9 +116,9 @@ contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
         uint256 refundScaled = _downscale(refund);
         uint256 tipTxFeeScaled = _downscale(tipTxFee);
         uint256 baseTxFeeScaled = _downscale(baseTxFee);
-        uint256 creditValueScaled = refundScaled.add(tipTxFeeScaled).add(
-            baseTxFeeScaled
-        );
+        uint256 creditValueScaled = refundScaled +
+            tipTxFeeScaled +
+            baseTxFeeScaled;
 
         require(
             creditValueScaled <= _debitedValue,
@@ -129,13 +126,13 @@ contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
         );
 
         // When downscaling, data can be lost, leading to inaccurate sums.
-        uint256 roundingError = _debitedValue.sub(creditValueScaled);
+        uint256 roundingError = _debitedValue - creditValueScaled;
         if (roundingError > 0) {
             // In this case, allocate the remainder to the community fund (base fee).
             // Instead of allocating to the validator (tipTxFee), we do this to prevent
             // the risk of actors gaming the scaling system (even if the actual difference
             // is expected to be very small).
-            baseTxFeeScaled = baseTxFeeScaled.add(roundingError);
+            baseTxFeeScaled = baseTxFeeScaled + roundingError;
         }
 
         adaptedToken.creditGasFees(
@@ -158,7 +155,7 @@ contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
      * @dev The caller is responsible for preconditions, as uint256 does not provide decimals.
      */
     function _upscale(uint256 value) internal view returns (uint256) {
-        return value.mul(upscaleFactor);
+        return value * upscaleFactor;
     }
 
     /**
@@ -168,6 +165,6 @@ contract FiatTokenFeeAdapterV1 is IFiatTokenFeeAdapter {
      * This downscaling will round down on the division operator.
      */
     function _downscale(uint256 value) internal view returns (uint256) {
-        return value.div(upscaleFactor);
+        return value / upscaleFactor;
     }
 }

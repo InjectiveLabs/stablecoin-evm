@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-pragma solidity 0.6.12;
+pragma solidity 0.8.20;
 
-import { FiatTokenV2_2 } from "../../contracts/v2/FiatTokenV2_2.sol";
+import { FiatTokenV2_Inj } from "../../contracts/v2/FiatTokenV2_Inj.sol";
 import {
     FiatTokenCeloV2_2
 } from "../../contracts/v2/celo/FiatTokenCeloV2_2.sol";
@@ -35,19 +35,19 @@ contract DeployImpl {
      * 2) loads an instance of an existing contract when input is not the zero address.
      *
      * @param impl configured of the implementation contract, where address(0) represents a new instance should be deployed
-     * @return FiatTokenV2_2 newly deployed or loaded instance
+     * @return FiatTokenV2_Inj newly deployed or loaded instance
      */
-    function getOrDeployImpl(address impl) internal returns (FiatTokenV2_2) {
-        FiatTokenV2_2 fiatTokenV2_2;
+    function getOrDeployImpl(address impl) internal returns (FiatTokenV2_Inj) {
+        FiatTokenV2_Inj fiatTokenV2_inj;
 
         if (impl == address(0)) {
-            fiatTokenV2_2 = new FiatTokenV2_2();
+            fiatTokenV2_inj = new FiatTokenV2_Inj();
 
             // Initializing the implementation contract with dummy values here prevents
             // the contract from being reinitialized later on with different values.
             // Dummy values can be used here as the proxy contract will store the actual values
             // for the deployed token.
-            fiatTokenV2_2.initialize(
+            fiatTokenV2_inj.initialize(
                 "",
                 "",
                 "",
@@ -57,14 +57,14 @@ contract DeployImpl {
                 THROWAWAY_ADDRESS,
                 THROWAWAY_ADDRESS
             );
-            fiatTokenV2_2.initializeV2("");
-            fiatTokenV2_2.initializeV2_1(THROWAWAY_ADDRESS);
-            fiatTokenV2_2.initializeV2_2(new address[](0), "");
+            fiatTokenV2_inj.initializeV2("");
+            fiatTokenV2_inj.initializeV2_1(THROWAWAY_ADDRESS);
+            fiatTokenV2_inj.initializeV2_2(new address[](0), "");
         } else {
-            fiatTokenV2_2 = FiatTokenV2_2(impl);
+            fiatTokenV2_inj = FiatTokenV2_Inj(payable(impl));
         }
 
-        return fiatTokenV2_2;
+        return fiatTokenV2_inj;
     }
 
     /**
