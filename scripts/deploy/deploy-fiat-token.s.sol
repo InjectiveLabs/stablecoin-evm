@@ -24,7 +24,7 @@ import { DeployImpl } from "./DeployImpl.sol";
 import { FiatTokenProxy } from "../../contracts/v1/FiatTokenProxy.sol";
 import { FiatTokenV2_Inj } from "../../contracts/v2/FiatTokenV2_Inj.sol";
 import { MasterMinter } from "../../contracts/minting/MasterMinter.sol";
-import { MockBankPrecompile } from "./injective/MockBankPrecompile.sol";
+// import { MockBankPrecompile } from "./injective/MockBankPrecompile.sol";
 
 /**
  * A utility script to directly deploy Fiat Token contract with the latest implementation
@@ -72,7 +72,7 @@ contract DeployFiatToken is Script, DeployImpl {
         console.log("TOKEN_NAME: '%s'", tokenName);
         console.log("TOKEN_SYMBOL: '%s'", tokenSymbol);
         console.log("TOKEN_CURRENCY: '%s'", tokenCurrency);
-        console.log("TOKEN_DECIMALS: '%s'", tokenDecimals);
+        console.log("TOKEN_DECIMALS:", uint256(tokenDecimals));
         console.log("FIAT_TOKEN_IMPLEMENTATION_ADDRESS: '%s'", impl);
         console.log("PROXY_ADMIN_ADDRESS: '%s'", proxyAdmin);
         console.log("MASTER_MINTER_OWNER_ADDRESS: '%s'", masterMinterOwner);

@@ -46,8 +46,18 @@ contract FiatTokenV2_Inj is FiatTokenV2_2 {
         // solhint-disable-next-line reason-string
         require(_initializedVersion == 3);
 
-        _bank = IBankModule(bankPrecompileAddress);
-        _bank.setMetadata(name, symbol, decimals);
+        // Use low-level call instead of interface to work around precompile detection issues
+        (bool success, bytes memory data) = bankPrecompileAddress.call(
+            abi.encodeWithSignature("setMetadata(string,string,uint8)", name, symbol, decimals)
+        );
+        
+        require(success, "Bank precompile setMetadata call failed");
+        
+        // Optionally verify the return value if data is available
+        if (data.length >= 32) {
+            bool result = abi.decode(data, (bool));
+            require(result, "Bank precompile setMetadata returned false");
+        }
 
         _initializedVersion = 4;
     }
